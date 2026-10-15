@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Maafin Aku Ya...</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap');
+
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Fredoka',sans-serif; }
+
+        body {
+            background-color: #CA1F7B;
+            overflow: hidden;
+            width:100vw; height:100vh; height:100dvh;
+            display:flex; justify-content:center; align-items:center;
+        }
+
+        /* =============================================
+           HATI MELAYANG
+        ============================================= */
+        #hearts-bg {
+            position:fixed; inset:0;
+            pointer-events:none;
+            z-index:5;
+        }
+        .flying-heart {
+            position:absolute; bottom:-80px;
+            cursor:pointer; pointer-events:auto;
+            user-select:none;
+            animation:flyUp linear forwards;
+        }
+        .flying-heart img {
+            width:100%; height:100%;
+            display:block; pointer-events:none;
+        }
+        @keyframes flyUp {
+            0%   { transform:translateY(0)     scale(.8) rotate(-5deg); opacity:1;   }
+            50%  { transform:translateY(-55vh) scale(1.1) rotate(5deg); opacity:.9; }
+            100% { transform:translateY(-115vh)scale(1.4) rotate(-8deg);opacity:0;  }
+        }
+
+        /* =============================================
+           POP GELEMBUNG
+        ============================================= */
+        .bubble-pop {
+            position:fixed; border-radius:50%;
+            background:radial-gradient(circle at 35% 35%,rgba(248,248,255,.9),rgba(202,31,123,.5));
+            border:3px solid rgba(248,248,255,.95);
+            box-shadow:inset 0 0 12px rgba(248,248,255,.6);
+            animation:bubblePop .5s ease-out forwards;
+            pointer-events:none; z-index:300;
+        }
+        @keyframes bubblePop {
+            0%  {transform:scale(.3); opacity:1;}
+            60% {transform:scale(1.8);opacity:.7;}
+            100%{transform:scale(2.8);opacity:0;}
+        }
+        .spark {
+            position:fixed; width:8px; height:8px; border-radius:50%;
+            pointer-events:none; z-index:301;
+            animation:sparkFly .6s ease-out forwards;
+        }
+        @keyframes sparkFly {
+            0%  {transform:translate(0,0) scale(1); opacity:1;}
+            100%{transform:translate(var(--sx),var(--sy)) scale(0);opacity:0;}
+        }
+        .floating-text {
+            position:fixed; color:#F8F8FF; font-weight:600; font-size:1.25rem;
+            white-space:nowrap;
+            text-shadow:0 0 8px #CA1F7B, 2px 2px 4px rgba(202,31,123,.9);
+            pointer-events:none; z-index:302;
+            transform-origin:center bottom;
+            animation:textPop 1.8s cubic-bezier(.175,.885,.32,1.275) forwards;
+        }
+        @keyframes textPop {
+            0%  {transform:scale(0) translateY(0);   opacity:0;}
+            15% {transform:scale(1.3) translateY(-5px); opacity:1;}
+            30% {transform:scale(1) translateY(-10px);  opacity:1;}
+            80% {transform:scale(.95) translateY(-60px);opacity:1;}
+            100%{transform:scale(.9) translateY(-90px); opacity:0;}
+        }
+
+        /* =============================================
+           SLIDE
+        ============================================= */
+        .slide {
+            position:absolute;
+            width:90%; max-width:400px; height:85vh; height:85dvh;
+            background:rgba(248,248,255,.97);
+            border-radius:24px;
+            box-shadow:0 12px 40px rgba(202,31,123,.18), 0 4px 16px rgba(0,0,0,.08);
+            display:flex; flex-direction:column;
+            justify-content:center; align-items:center;
+            padding:52px 20px 24px;
+            text-align:center;
+            z-index:10;
+            opacity:0; pointer-events:none; transform:scale(.5);
+            transition:opacity .1s, transform .1s;
+        }
+        .slide.active { opacity:1; pointer-events:auto; transform:scale(1); }
+
+        @keyframes popIn {
+            0%  {transform:scale(0);   opacity:0;}
+            70% {transform:scale(1.06);opacity:1;}
+            85% {transform:scale(.97); opacity:1;}
+            100%{transform:scale(1);   opacity:1;}
+        }
+        .pop-effect { animation:popIn .55s cubic-bezier(.175,.885,.32,1.275) forwards; }
+
+        /* Tombol balik */
+        .btn-back {
+            position:absolute; top:14px; left:14px;
+            background:rgba(202,31,123,.12); border:none; border-radius:50%;
+            width:38px; height:38px; font-size:1.2rem;
+            cursor:pointer; display:flex; align-items:center; justify-content:center;
+            transition:background .2s; z-index:2;
+        }
+        .btn-back:hover{background:rgba(202,31,123,.22);}
+
+        /* =============================================
+           SLIDE 1: BERUANG
+        ============================================= */
+        .bear-wrapper {
+            position:relative; display:inline-block;
+            animation:bearPulse 2.2s ease-in-out infinite;
+        }
+        .bear-wrapper img.bear-img { width:220px; height:auto; display:block; }
+
+        /* Area klik hanya di bagian hati */
+        .bear-heart-zone {
+            position:absolute;
+            left:28%; right:22%; top:60%; bottom:8%;
+            cursor:pointer; border-radius:50%;
+        }
+        .bear-heart-zone::after {
+            content:''; position:absolute; inset:0; border-radius:50%;
+            background:rgba(202,31,123,.2); opacity:0; transition:opacity .2s;
+        }
+        .bear-heart-zone:hover::after,
+        .bear-heart-zone:active::after { opacity:1; }
+
+        @keyframes bearPulse {
+            0%,100%{transform:scale(1);}
+            50%    {transform:scale(1.04);}
+        }
+        .click-hint {
+            margin-top:16px; font-size:1.3rem; color:#CA1F7B; font-weight:600;
+            animation:hintBounce 1.5s ease-in-out infinite;
+        }
+        @keyframes hintBounce {
+            0%,100%{transform:translateY(0);}
+            50%    {transform:translateY(-5px);}
+        }
+
+        /* =============================================
+           SLIDE 2: SURAT
+        ============================================= */
+        .letter-content {
+            flex-grow:1; overflow-y:auto; margin-bottom:16px; padding-right:8px;
+            text-align:left; font-size:1.05rem; line-height:1.65; color:#444; width:100%;
+            scrollbar-width:thin; scrollbar-color:#CA1F7B transparent;
+        }
+        .letter-content h2{color:#CA1F7B;margin-bottom:14px;text-align:center;font-size:1.4rem;}
+
+        .btn-next {
+            background:linear-gradient(135deg,#CA1F7B,#CA1F7B);
+            color:#F8F8FF; border:none; padding:13px 32px; border-radius:30px;
+            font-size:1.1rem; font-weight:600; font-family:'Fredoka',sans-serif;
+            cursor:pointer; box-shadow:0 5px 18px rgba(202,31,123,.4);
+            transition:transform .15s; flex-shrink:0;
+        }
+        .btn-next:active{transform:scale(.95);}
+
+        /* =============================================
+           SLIDE 3: YA / ENGGAK
+        ============================================= */
+        .question-text{
+            font-size:1.75rem; color:#CA1F7B;
+            margin-bottom:36px; line-height:1.3;
+        }
+
+        /* Dua tombol berdampingan kiri–kanan */
+        .btn-row {
+            display:flex; justify-content:center;
+            gap:18px; width:100%;
+        }
+
+        .btn-choice {
+            padding:13px 26px; border:none; border-radius:30px;
+            font-size:1.1rem; font-weight:600; font-family:'Fredoka',sans-serif;
+            cursor:pointer; white-space:nowrap;
+        }
+
+        #btnYes {
+            background:linear-gradient(135deg,#CA1F7B,#CA1F7B);
+            color:#F8F8FF;
+            box-shadow:0 5px 18px rgba(202,31,123,.45);
+            transition:transform .12s;
+        }
+        #btnYes:active{transform:scale(.93);}
+
+        /*
+         * btnNo — normal di dalam flow sampai pertama kali diklik.
+         * Setelah diklik JS menambahkan class .fleeing → position:fixed + transition.
+         * Posisi barunya SELALU dihitung ulang berdasarkan ukuran layar saat itu,
+         * jadi tombol tidak pernah keluar dari area web / hilang dari layar.
+         */
+        #btnNo {
+            background:#F8F8FF;
+            color:#CA1F7B;
+            box-shadow:inset 0 0 0 2px #CA1F7B, 0 5px 18px rgba(202,31,123,.3);
+            position:relative;   /* normal flow */
+            z-index:100;
+        }
+        #btnNo.fleeing {
+            position:fixed;
+            transition: left .22s cubic-bezier(.34,1.56,.64,1),
+                        top  .22s cubic-bezier(.34,1.56,.64,1);
+        }
+
+        /* =============================================
+           SLIDE 4: GALERI SCATTERED (POLAROID)
+        ============================================= */
+        .gallery-header{color:#CA1F7B;font-size:1.55rem;font-weight:600;margin-bottom:4px;}
+        .gallery-subtitle{color:#888;font-size:.93rem;margin-bottom:14px;}
+
+        .gallery-scattered{
+            position:relative; width:100%; flex-grow:1; overflow:hidden;
+        }
+
+        .photo-card {
+            position:absolute; background:#F8F8FF; border-radius:4px;
+            box-shadow:0 4px 18px rgba(0,0,0,.18), 0 1px 4px rgba(0,0,0,.1);
+            display:flex; flex-direction:column; align-items:center;
+            padding:7px 7px 26px;
+            transition:transform .25s ease, box-shadow .25s ease;
+            cursor:pointer;
+        }
+        .photo-card:hover{box-shadow:0 12px 32px rgba(0,0,0,.28);}
+
+        .photo-card .photo-inner {
+            width:100%; aspect-ratio:1;
+            background:linear-gradient(135deg,rgba(202,31,123,.12),rgba(202,31,123,.3));
+            border-radius:2px;
+            display:flex; justify-content:center; align-items:center;
+            color:#bbb; font-size:.85rem; overflow:hidden;
+            text-align:center; line-height:1.3;
+        }
+        .photo-card .photo-inner img {
+            width:100%; height:100%; object-fit:cover; border-radius:2px;
+            pointer-events:none;
+        }
+        .photo-card .photo-label{
+            position:absolute; bottom:5px;
+            font-size:.72rem; color:#aaa; font-style:italic;
+        }
+
+        .photo-card:nth-child(1){width:48%;left:2%;  top:0%;   transform:rotate(-8deg); z-index:3;}
+        .photo-card:nth-child(2){width:44%;right:0%; top:3%;   transform:rotate(12deg); z-index:4;}
+        .photo-card:nth-child(3){width:50%;left:10%; top:36%;  transform:rotate(4deg);  z-index:5;}
+        .photo-card:nth-child(4){width:42%;right:2%; top:44%;  transform:rotate(-11deg);z-index:2;}
+        .photo-card:nth-child(5){width:46%;left:0%;  bottom:0%;transform:rotate(7deg);  z-index:6;}
+        .photo-card:nth-child(6){width:44%;right:4%; bottom:2%;transform:rotate(-5deg); z-index:3;}
+
+        .photo-card:nth-child(1):hover{transform:rotate(-2deg) scale(1.08);z-index:20;}
+        .photo-card:nth-child(2):hover{transform:rotate(3deg)  scale(1.08);z-index:20;}
+        .photo-card:nth-child(3):hover{transform:rotate(1deg)  scale(1.08);z-index:20;}
+        .photo-card:nth-child(4):hover{transform:rotate(-2deg) scale(1.08);z-index:20;}
+        .photo-card:nth-child(5):hover{transform:rotate(2deg)  scale(1.08);z-index:20;}
+        .photo-card:nth-child(6):hover{transform:rotate(-1deg) scale(1.08);z-index:20;}
+
+        .photo-card { -webkit-tap-highlight-color:transparent; }
+        .photo-card.kosong { cursor:default; }
+
+        #toast {
+            position:fixed; left:50%; bottom:40px; transform:translateX(-50%) translateY(20px);
+            background:rgba(202,31,123,.92); color:#F8F8FF; padding:11px 20px; border-radius:24px;
+            font-size:.95rem; z-index:600; opacity:0; pointer-events:none;
+            transition:opacity .25s, transform .25s; max-width:90vw; text-align:center;
+        }
+        #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+        /* =============================================
+           LIGHTBOX (zoom in/out + navigasi foto lain)
+        ============================================= */
+        #lightbox {
+            display:none; position:fixed; inset:0;
+            background:rgba(0,0,0,.85);
+            z-index:500;
+            justify-content:center; align-items:center;
+        }
+        #lightbox.open{display:flex; animation:lbFade .2s ease;}
+        @keyframes lbFade{from{opacity:0}to{opacity:1}}
+
+        #lightbox-img {
+            max-width:90vw; max-height:85vh; border-radius:10px;
+            box-shadow:0 0 60px rgba(0,0,0,.6); object-fit:contain;
+            cursor:zoom-in; opacity:0;
+            touch-action:none;               /* biar gesture pinch/geser ditangani JS, bukan browser */
+            user-select:none; -webkit-user-drag:none;
+            will-change:transform;
+            /* transform & transition diatur lewat JS (zoom/geser) */
+        }
+
+        #lightbox-close {
+            position:fixed; top:18px; right:22px;
+            color:#F8F8FF; font-size:2.2rem; cursor:pointer;
+            background:none; border:none; font-family:sans-serif;
+            text-shadow:0 2px 6px rgba(0,0,0,.5); z-index:501;
+        }
+        #lightbox-label{
+            position:fixed; bottom:24px;
+            color:rgba(248,248,255,.8); font-size:1rem; font-style:italic;
+        }
+
+        /* Tombol navigasi foto sebelumnya / selanjutnya */
+        .lightbox-nav {
+            position:fixed; top:50%; transform:translateY(-50%);
+            background:rgba(248,248,255,.15); border:none; color:#F8F8FF;
+            font-size:2.1rem; width:50px; height:50px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; z-index:501; user-select:none;
+            transition:background .2s;
+            text-shadow:0 2px 6px rgba(0,0,0,.5);
+        }
+        .lightbox-nav:hover{ background:rgba(248,248,255,.32); }
+        #lightbox-prev{ left:12px; }
+        #lightbox-next{ right:12px; }
+        @media (max-width:480px){
+            .lightbox-nav{ width:42px; height:42px; font-size:1.7rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== BACKGROUND HATI ========== -->
+<div id="hearts-bg"></div>
+
+<!-- ========== SLIDE 1: BERUANG ========== -->
+<div id="slide1" class="slide active">
+    <div class="bear-wrapper">
+        <img class="bear-img"
+             src="image/a0bb79d5-87e6-4d5f-8a73-168dab6e6a15-Photoroom.png"
+             alt="Beruang Bawa Hati">
+        <!-- Hanya area hati yang bisa diklik -->
+        <div class="bear-heart-zone" onclick="goToSlide(2)" title="Klik cintakuu!"></div>
+    </div>
+    <p class="click-hint">Sentuh hatinya... ❤️</p>
+</div>
+
+<!-- ========== SLIDE 2: SURAT ========== -->
+<div id="slide2" class="slide">
+    <button class="btn-back" onclick="goToSlide(1)">←</button>
+    <div class="letter-content">
+        <h2>Untuk Sinta Prisha Jegeg Bulan</h2>
+        <p>Haloooo Sintaaaaaaaaa</p><br>
+        <p>Aku mau minta maaf sin buat selama ini aku selalu bikin janji manis yang ga bisa ku tepatin dan berujung malah bikin kau kecewa, mulutku ceplas ceplos banget tanpa mikir, harusnya kalo ga bisa aku ga usah bikinin janji yang bikin kau berharap dan pada akhirnya malah ngecewain dirimu.</p><br>
+        <p>Dan maaf juga kalo aku selama ini sering nyela saat kau cerita aku kayak ga menghargai kau jadinya padahal dalam hubungan ini ga semua tentang aku, pasti aku nyebelin banget ya, kalo aku gitu lagi plis tegur aja sin marahin aku, aku suka kok kamu marahin aku ngeluarin sifat jelek kayak gini.</p><br>
+        <p>Maaf juga aku kayak kurang perhatiin kamu aku bahkan ga bisa inget hal sesederhana letak tai lalatmu, i mean se enggak peka apa diriku hal kecil gitu aja ga tau, aku mau berubah tapi mungkin ga secepet itu karena aku orangnya emang rada pelupa(maklum dah tua), tapi aku usahain bakal berubah dan bisa buat lebih mahamin dirimu .</p><br>
+        <p>Untuk kedepannya aku akan usahain untuk bisa ngungkapin sayang dan cintaku ga cuma omong kosong aja ga ada action, semoga kedepannya hubungan kita bisa lebih baik lagi, bisa bikin satu sama lain nyaman dan ga hanya salah satu dari kita aja yang ingin excited sendiri(btw coba klik hati hati yang melayang itu....).</p>
+        <br>
+        <p>I lOVE YOU SINTAAAAAAAAAAAAAA❤️</p>
+    </div>
+    <button class="btn-next" onclick="goToSlide(3)">Lanjut Sini Sayang &gt;&gt;</button>
+</div>
+
+<!-- ========== SLIDE 3: PILIHAN ========== -->
+<div id="slide3" class="slide">
+    <button class="btn-back" onclick="goToSlide(2)">←</button>
+    <h2 class="question-text">Jadi... Kamu mau maafin aku nggak? 🥺</h2>
+    <div class="btn-row">
+        <button id="btnYes" class="btn-choice" onclick="goToSlide(4)">Iya, Dimaafin Kok💚</button>
+        <button id="btnNo"  class="btn-choice">Enggak !😤</button>
+    </div>
+</div>
+
+<!-- ========== SLIDE 4: GALERI ========== -->
+<div id="slide4" class="slide">
+    <button class="btn-back" onclick="goToSlide(3)">←</button>
+    <h2 class="gallery-header">Yeyyyy makasih pacarku paling cantik paling baik 🥰</h2>
+    <p class="gallery-subtitle">Masih Inget Momen Ini gakk???</p>
+
+    <div class="gallery-scattered">
+        <div class="photo-card" onclick="openLightbox(this)">
+            <div class="photo-inner">
+                <img src="image/pict1.png" alt="Foto 1"
+                     onerror="this.style.display='none';this.parentNode.innerHTML='📸<br>Belum ada<br>foto 1';">
+            </div>
+            <span class="photo-label">pas kita mau momoyo lalu malah batuk wkwk</span>
+        </div>
+        <div class="photo-card" onclick="openLightbox(this)">
+            <div class="photo-inner">
+                <img src="image/pict2.png" alt="Foto 2"
+                     onerror="this.style.display='none';this.parentNode.innerHTML='📸<br>Belum ada<br>foto 2';">
+            </div>
+            <span class="photo-label">pas di momoyo masih sehat ni yaa</span>
+        </div>
+        <div class="photo-card" onclick="openLightbox(this)">
+            <div class="photo-inner">
+                <img src="image/pict3.png" alt="Foto 3"
+                     onerror="this.style.display='none';this.parentNode.innerHTML='📸<br>Belum ada<br>foto 3';">
+            </div>
+            <span class="photo-label">ini pas kau ajakin aku belanja kebutuhan tugasmu lalu gacoan</span>
+        </div>
+        <div class="photo-card" onclick="openLightbox(this)">
+            <div class="photo-inner">
+                <img src="image/pict4.png" alt="Foto 4"
+                     onerror="this.style.display='none';this.parentNode.innerHTML='📸<br>Belum ada<br>foto 4';">
+            </div>
+            <span class="photo-label">ini aku ajak buat rakit bricks sampe kau muak awkaokw</span>
+        </div>
+        <div class="photo-card" onclick="openLightbox(this)">
+            <div class="photo-inner">
+                <img src="image/pict5.png" alt="Foto 5"
+                     onerror="this.style.display='none';this.parentNode.innerHTML='📸<br>Belum ada<br>foto 5';">
+            </div>
+            <span class="photo-label">seneng banget aku pas lulus kukira ga ada yang dateng</span>
+        </div>
+        <div class="photo-card" onclick="openLightbox(this)">
+            <div class="photo-inner">
+                <img src="image/pict6.png" alt="Foto 6"
+                     onerror="this.style.display='none';this.parentNode.innerHTML='📸<br>Belum ada<br>foto 6';">
+            </div>
+            <span class="photo-label">inget ga first date kita hehe momen paling bahagia ku ini</span>
+        </div>
+    </div>
+</div>
+
+<!-- ========== LIGHTBOX ========== -->
+<div id="lightbox">
+    <button id="lightbox-prev" class="lightbox-nav" onclick="event.stopPropagation(); changePhoto(-1)" title="Foto sebelumnya">‹</button>
+    <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+    <img id="lightbox-img" src="" alt="" draggable="false">
+    <button id="lightbox-next" class="lightbox-nav" onclick="event.stopPropagation(); changePhoto(1)" title="Foto selanjutnya">›</button>
+    <span id="lightbox-label"></span>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ================================================================
+//  KATA-KATA RANDOM
+// ================================================================
+const kataKataRandom = [
+    "halooo sintaaa 😘",
+    "love youuuuuuu",
+    "Jangan ngambek ngambek ya",
+    "Aku kangen banget tauu",
+    "Senyummu manis banget sihhhh",
+    "Aku mau minta maaf",
+    "Pleaseee dimaafin 🙏",
+    "Kamu itu perfect banget buat aku",
+    "Semangat ya sintaaa aku dukung ampe kaya",
+    "Mwah! 😘",
+    "Perlahan tapi aku bakal berubah kok bikin hubungan kita lebih baik",
+    "Maafin aku yang ga perfect ini ya sayang",
+];
+
+// ================================================================
+//  HATI MELAYANG
+// ================================================================
+function createFloatingHeart() {
+    const heart = document.createElement('div');
+    heart.classList.add('flying-heart');
+
+    const size = Math.random() * 28 + 32;
+    heart.style.width  = size + 'px';
+    heart.style.height = size + 'px';
+    heart.style.left   = (Math.random() * 85 + 5) + 'vw';
+
+    const dur = Math.random() * 8 + 12;
+    heart.style.animationDuration = dur + 's';
+    heart.style.animationDelay    = (Math.random() * 1.5) + 's';
+
+    const img = document.createElement('img');
+    img.src = 'image/0bdf022f-d5a4-4481-8935-a180b019ab66-Photoroom.png';
+    img.alt = '';
+    heart.appendChild(img);
+
+    heart.addEventListener('click', e => {
+        e.stopPropagation();
+        popHeart(e.clientX, e.clientY, heart);
+    });
+    heart.addEventListener('touchstart', e => {
+        e.preventDefault(); e.stopPropagation();
+        popHeart(e.touches[0].clientX, e.touches[0].clientY, heart);
+    }, { passive: false });
+
+    document.getElementById('hearts-bg').appendChild(heart);
+    setTimeout(() => { if (heart.parentNode) heart.remove(); }, (dur + 3) * 1000);
+}
+setInterval(createFloatingHeart, 1200);
+
+// ================================================================
+//  EFEK POP
+// ================================================================
+function popHeart(x, y, heartEl) {
+    if (heartEl && heartEl.parentNode) heartEl.remove();
+    const sz = 70;
+    const bubble = document.createElement('div');
+    bubble.classList.add('bubble-pop');
+    Object.assign(bubble.style, {
+        left:(x-sz/2)+'px', top:(y-sz/2)+'px', width:sz+'px', height:sz+'px'
+    });
+    document.body.appendChild(bubble);
+
+    const colors = ['#F8F8FF','#F8F8FF','#F8F8FF','#F8F8FF','#F8F8FF','#F8F8FF'];
+    for (let i = 0; i < 6; i++) {
+        const s = document.createElement('div');
+        s.classList.add('spark');
+        s.style.cssText = `left:${x-4}px;top:${y-4}px;background:${colors[i]};`;
+        const a = (i/6)*Math.PI*2, d = Math.random()*40+25;
+        s.style.setProperty('--sx', Math.cos(a)*d+'px');
+        s.style.setProperty('--sy', Math.sin(a)*d+'px');
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 700);
+    }
+
+    const text = document.createElement('div');
+    text.classList.add('floating-text');
+    text.textContent = kataKataRandom[Math.floor(Math.random()*kataKataRandom.length)];
+    document.body.appendChild(text);
+    requestAnimationFrame(() => {
+        text.style.left = (x - text.offsetWidth/2)  + 'px';
+        text.style.top  = (y - text.offsetHeight/2) + 'px';
+    });
+    setTimeout(() => { bubble.remove(); text.remove(); }, 1900);
+}
+
+// ================================================================
+//  NAVIGASI SLIDE
+// ================================================================
+function goToSlide(num) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active','pop-effect'));
+    document.getElementById('slide' + num).classList.add('active','pop-effect');
+    resetBtnNo(); // tombol 'Enggak' selalu dikembalikan ke kartu saat pindah slide
+}
+
+// ================================================================
+//  TOMBOL "ENGGAK"
+//  – Tetap di flow normal sampai PERTAMA KALI diklik
+//  – Setelah diklik, jadi position:fixed dan lari jauh dari klik
+//  – Batasnya SELALU dihitung ulang dari ukuran layar saat ini,
+//    jadi dia nggak akan pernah lari keluar layar / hilang.
+// ================================================================
+const btnNo = document.getElementById('btnNo');
+
+// Tombol dipindah ke <body> saat kabur. Kenapa? Slide punya CSS transform
+// (efek scale/pop-in), dan elemen ber-transform menjadi "induk" untuk anak
+// yang position:fixed → koordinat left/top jadi relatif ke KARTU, bukan ke
+// layar, sehingga tombol bisa nongol jauh di luar layar. Di <body> (tanpa
+// transform) position:fixed benar-benar relatif ke layar.
+const btnRow         = btnNo.parentNode;
+const btnPlaceholder = document.createElement('span'); // penjaga ruang di baris tombol
+btnPlaceholder.style.display = 'inline-block';
+
+function resetBtnNo() {
+    btnNo.classList.remove('fleeing');
+    btnNo.style.left = '';
+    btnNo.style.top  = '';
+    if (btnPlaceholder.parentNode === btnRow) {
+        btnRow.replaceChild(btnNo, btnPlaceholder); // balik ke posisi awal di baris
+    }
+}
+
+const BTN_MARGIN = 16;
+
+// Lebar/tinggi viewport yang SEBENARNYA kelihatan di layar.
+// visualViewport lebih akurat di HP (ikut berubah saat address bar
+// browser muncul/hilang atau saat di-pinch-zoom); window.innerWidth/Height
+// jadi fallback untuk browser yang belum support.
+function getViewportSize() {
+    if (window.visualViewport) {
+        return { w: window.visualViewport.width, h: window.visualViewport.height };
+    }
+    return { w: window.innerWidth, h: window.innerHeight };
+}
+
+function larikBtnNo(cx, cy) {
+    const margin = BTN_MARGIN;
+
+    // Klik pertama: pindahkan tombol ke <body> di posisi visual yang sama
+    if (!btnNo.classList.contains('fleeing')) {
+        const rect = btnNo.getBoundingClientRect();
+        btnPlaceholder.style.width  = rect.width  + 'px';
+        btnPlaceholder.style.height = rect.height + 'px';
+        btnRow.replaceChild(btnPlaceholder, btnNo);
+        document.body.appendChild(btnNo);
+        btnNo.style.left = rect.left + 'px';
+        btnNo.style.top  = rect.top  + 'px';
+        btnNo.classList.add('fleeing');
+        // Kecil delay agar browser register posisi awal dulu (biar ada animasi geser)
+        setTimeout(() => pilihPosisiBaru(cx, cy, margin), 20);
+        return;
+    }
+    pilihPosisiBaru(cx, cy, margin);
+}
+
+function pilihPosisiBaru(cx, cy, margin) {
+    // Ukur lebar/tinggi tombol PAS SEKARANG (bukan cache lama), jadi kalau
+    // font custom baru selesai load dan ukurannya berubah, tetap akurat.
+    const bw = btnNo.offsetWidth  || 130;
+    const bh = btnNo.offsetHeight || 50;
+    const { w: vw, h: vh } = getViewportSize();
+
+    // Selalu di-clamp minimal "margin", jadi tombol nggak pernah nempel/keluar tepi layar
+    const maxX = Math.max(margin, vw - bw - margin);
+    const maxY = Math.max(margin, vh - bh - margin);
+    const minDist = Math.min(vw, vh) * 0.38;
+
+    let rx, ry, dist, tries = 0;
+    do {
+        rx   = Math.floor(Math.random() * (maxX - margin + 1)) + margin;
+        ry   = Math.floor(Math.random() * (maxY - margin + 1)) + margin;
+        dist = Math.hypot(rx + bw/2 - cx, ry + bh/2 - cy);
+        tries++;
+    } while (dist < minDist && tries < 100);
+
+    btnNo.style.left = rx + 'px';
+    btnNo.style.top  = ry + 'px';
+}
+
+// Jaring pengaman terakhir: abis posisi baru selesai dipasang (atau abis
+// transisi gesernya kelar), cek beneran apa tombolnya masih nongol/kepotong
+// di luar layar. Kalau iya, langsung tarik balik ke dalam TANPA animasi
+// (instan) supaya nggak pernah ada bagian tombol yang hilang dari pandangan.
+function clampBtnNoKeDalamLayar() {
+    if (!btnNo.classList.contains('fleeing')) return;
+    const margin = BTN_MARGIN;
+    const { w: vw, h: vh } = getViewportSize();
+    const rect  = btnNo.getBoundingClientRect();
+    const maxX  = Math.max(margin, vw - rect.width  - margin);
+    const maxY  = Math.max(margin, vh - rect.height - margin);
+
+    let left = rect.left, top = rect.top, changed = false;
+    if (left < margin) { left = margin; changed = true; }
+    if (left > maxX)   { left = maxX;   changed = true; }
+    if (top  < margin) { top  = margin; changed = true; }
+    if (top  > maxY)   { top  = maxY;   changed = true; }
+
+    if (changed) {
+        const prevTransition = btnNo.style.transition;
+        btnNo.style.transition = 'none'; // koreksi instan, nggak usah animasi
+        btnNo.style.left = left + 'px';
+        btnNo.style.top  = top  + 'px';
+        void btnNo.offsetWidth; // paksa reflow
+        btnNo.style.transition = prevTransition;
+    }
+}
+
+// Hanya bereaksi saat DIKLIK (bukan hover)
+btnNo.addEventListener('click', e => {
+    e.preventDefault();
+    larikBtnNo(e.clientX, e.clientY);
+});
+btnNo.addEventListener('touchstart', e => {
+    e.preventDefault();
+    larikBtnNo(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: false });
+
+// Setiap kali transisi geser selesai, cek ulang & koreksi kalau perlu
+// (ini yang nutup celah dari font yang baru selesai load / ukuran berubah).
+btnNo.addEventListener('transitionend', clampBtnNoKeDalamLayar);
+
+// Kalau layar di-resize/diputar, atau di HP address bar browser
+// muncul-hilang / di-pinch-zoom, posisi tombol ikut dikoreksi.
+window.addEventListener('resize', clampBtnNoKeDalamLayar);
+window.addEventListener('orientationchange', clampBtnNoKeDalamLayar);
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', clampBtnNoKeDalamLayar);
+}
+
+// Begitu font custom (Fredoka) selesai dimuat, ukuran tombol bisa berubah
+// sedikit — cek & koreksi langsung saat itu juga.
+if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(clampBtnNoKeDalamLayar);
+}
+
+// ================================================================
+//  LIGHTBOX FOTO — zoom in/out, geser (pan), pinch, scroll, swipe
+//  • Klik/tap foto      → zoom in ke titik yang diklik; klik lagi → zoom out
+//  • Zoom in + drag     → geser foto
+//  • Scroll mouse       → zoom in/out    • Pinch 2 jari di HP → zoom
+//  • Swipe kiri/kanan   → foto lain (saat tidak di-zoom)
+//  • Tombol ‹ ›, panah keyboard, Esc, ✕, atau klik area gelap → navigasi/tutup
+// ================================================================
+const lightbox      = document.getElementById('lightbox');
+const lightboxImg   = document.getElementById('lightbox-img');
+const lightboxLabel = document.getElementById('lightbox-label');
+const toastEl       = document.getElementById('toast');
+const photoCards    = Array.from(document.querySelectorAll('.photo-card'));
+let currentPhotoIndex = 0;
+
+const MAX_SCALE = 5;
+const TAP_ZOOM  = 2.5;
+const view = { scale: 1, tx: 0, ty: 0 };
+
+let toastTimer;
+function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+}
+
+function isCardReady(card) {
+    const img = card && card.querySelector('img');
+    return !!img && img.style.display !== 'none';
+}
+
+// ---------- transform helper ----------
+function applyView(animate) {
+    lightboxImg.style.transition = animate ? 'transform .25s ease' : 'none';
+    lightboxImg.style.transform  = `translate(${view.tx}px, ${view.ty}px) scale(${view.scale})`;
+    lightboxImg.style.cursor     = view.scale > 1 ? 'grab' : 'zoom-in';
+}
+
+// Batasi geser supaya tepi foto tidak lewat dari tepi layar
+function clampPan() {
+    const mx = Math.max(0, (lightboxImg.offsetWidth  * view.scale - lightbox.clientWidth)  / 2);
+    const my = Math.max(0, (lightboxImg.offsetHeight * view.scale - lightbox.clientHeight) / 2);
+    view.tx = Math.min(mx, Math.max(-mx, view.tx));
+    view.ty = Math.min(my, Math.max(-my, view.ty));
+}
+
+// Zoom ke skala baru dengan titik (cx, cy) di layar tetap berada di bawah jari/kursor
+function zoomAt(newScale, cx, cy, animate) {
+    newScale = Math.min(MAX_SCALE, Math.max(1, newScale));
+    const qx = cx - lightbox.clientWidth  / 2;
+    const qy = cy - lightbox.clientHeight / 2;
+    const k  = newScale / view.scale;
+    view.tx = qx - k * (qx - view.tx);
+    view.ty = qy - k * (qy - view.ty);
+    view.scale = newScale;
+    if (newScale === 1) { view.tx = 0; view.ty = 0; }
+    clampPan();
+    applyView(animate);
+}
+
+// ---------- buka / tutup / ganti foto ----------
+function showPhotoAt(index) {
+    const card = photoCards[index];
+    if (!isCardReady(card)) return;
+    const img   = card.querySelector('img');
+    const label = card.querySelector('.photo-label');
+
+    lightboxImg.src           = img.src;
+    lightboxLabel.textContent = label ? label.textContent : '';
+
+    // reset zoom + animasi masuk (membesar dari kecil)
+    view.scale = 1; view.tx = 0; view.ty = 0;
+    lightboxImg.style.transition = 'none';
+    lightboxImg.style.opacity    = '0';
+    lightboxImg.style.transform  = 'translate(0px, 0px) scale(.6)';
+    void lightboxImg.offsetWidth; // paksa reflow supaya transisi jalan
+    lightboxImg.style.transition = 'transform .3s cubic-bezier(.175,.885,.32,1.275), opacity .25s ease';
+    lightboxImg.style.opacity    = '1';
+    lightboxImg.style.transform  = 'translate(0px, 0px) scale(1)';
+    lightboxImg.style.cursor     = 'zoom-in';
+}
+
+function openLightbox(card) {
+    if (!isCardReady(card)) {
+        showToast('Fotonya belum ditambahin 📸');
+        return;
+    }
+    currentPhotoIndex = photoCards.indexOf(card);
+    lightbox.classList.add('open');      // harus 'open' dulu supaya elemennya punya ukuran
+    showPhotoAt(currentPhotoIndex);
+}
+
+function changePhoto(direction) {
+    let idx = currentPhotoIndex;
+    for (let i = 0; i < photoCards.length; i++) {
+        idx = (idx + direction + photoCards.length) % photoCards.length;
+        if (isCardReady(photoCards[idx])) {
+            currentPhotoIndex = idx;
+            showPhotoAt(idx);
+            return;
+        }
+    }
+}
+
+function closeLightbox() {
+    lightbox.classList.remove('open');
+    lightboxImg.style.opacity = '0';
+    lightboxImg.src = '';
+    view.scale = 1; view.tx = 0; view.ty = 0;
+}
+
+// Klik area gelap (bukan foto/tombol) = tutup
+lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+// Klik foto jangan sampai menutup lightbox
+lightboxImg.addEventListener('click', e => e.stopPropagation());
+
+// ---------- gesture: klik/tap, drag, swipe, pinch (Pointer Events: mouse + touch) ----------
+const pointers = new Map();
+let gesture = null;
+
+lightboxImg.addEventListener('pointerdown', e => {
+    lightboxImg.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 1) {
+        gesture = { sx: e.clientX, sy: e.clientY, tx: view.tx, ty: view.ty, moved: false, pinch: false };
+        if (view.scale > 1) lightboxImg.style.cursor = 'grabbing';
+    } else if (pointers.size === 2 && gesture) {
+        const [a, b] = [...pointers.values()];
+        gesture.pinch = true; gesture.moved = true;
+        gesture.dist  = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+        gesture.scale = view.scale;
+    }
+});
+
+lightboxImg.addEventListener('pointermove', e => {
+    if (!pointers.has(e.pointerId) || !gesture) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointers.size === 2 && gesture.pinch) {
+        const [a, b] = [...pointers.values()];
+        const dist = Math.hypot(a.x - b.x, a.y - b.y);
+        zoomAt(gesture.scale * dist / gesture.dist, (a.x + b.x) / 2, (a.y + b.y) / 2, false);
+        return;
+    }
+    if (gesture.pinch) return;
+
+    const dx = e.clientX - gesture.sx, dy = e.clientY - gesture.sy;
+    if (Math.hypot(dx, dy) > 8) gesture.moved = true;
+    if (view.scale > 1 && gesture.moved) {        // geser foto yang sedang di-zoom
+        view.tx = gesture.tx + dx;
+        view.ty = gesture.ty + dy;
+        clampPan();
+        applyView(false);
+    }
+});
+
+function endPointer(e, cancelled) {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.delete(e.pointerId);
+    if (pointers.size > 0 || !gesture) return;     // masih ada jari lain
+    const g = gesture; gesture = null;
+    lightboxImg.style.cursor = view.scale > 1 ? 'grab' : 'zoom-in';
+    if (cancelled) return;
+
+    if (g.pinch) {                                  // selesai pinch: kalau hampir 1x, rapikan
+        if (view.scale < 1.05) zoomAt(1, lightbox.clientWidth / 2, lightbox.clientHeight / 2, true);
+        return;
+    }
+    const dx = e.clientX - g.sx, dy = e.clientY - g.sy;
+    if (!g.moved) {                                 // klik / tap → toggle zoom
+        if (view.scale > 1) zoomAt(1, e.clientX, e.clientY, true);
+        else                zoomAt(TAP_ZOOM, e.clientX, e.clientY, true);
+    } else if (view.scale === 1 && Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+        changePhoto(dx < 0 ? 1 : -1);               // swipe → foto lain
+    }
+}
+lightboxImg.addEventListener('pointerup',     e => endPointer(e, false));
+lightboxImg.addEventListener('pointercancel', e => endPointer(e, true));
+
+// Scroll mouse = zoom in/out di titik kursor
+lightbox.addEventListener('wheel', e => {
+    e.preventDefault();
+    zoomAt(view.scale * (e.deltaY < 0 ? 1.2 : 1 / 1.2), e.clientX, e.clientY, false);
+}, { passive: false });
+
+document.addEventListener('keydown', e => {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape')     closeLightbox();
+    if (e.key === 'ArrowRight') changePhoto(1);
+    if (e.key === 'ArrowLeft')  changePhoto(-1);
+});
+
+// Kalau layar diputar/di-resize saat zoom, rapikan batas geser
+window.addEventListener('resize', () => { if (lightbox.classList.contains('open')) { clampPan(); applyView(false); } });
+</script>
+</body>
+</html>
